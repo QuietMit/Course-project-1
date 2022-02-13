@@ -1,0 +1,18 @@
+
+
+import requests # для создания запросов к ресурсам VK и Яндекс.Диска из Python
+
+
+from pprint import pprint # для вывода данных, представленных в формате json
+
+
+import json # для преобразования данных в формат json
+
+
+from progress.bar import IncrementalBar # для отслеживания в консоли процесса выполнения кода
+
+
+import time # для написания кода прогресс-бара
+
+
+from datetime import datetime # для создания при каждом вызове уникального названия папки для сохранения файлов на Яндекс-Диске

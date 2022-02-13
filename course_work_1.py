@@ -3,12 +3,13 @@ print()
 import requests
 from pprint import pprint
 import json
-
+import time
+from progress.bar import IncrementalBar
 from datetime import datetime
 
 def get_vk_user_id():
     ''' Функция для получения id пользователя VK, 
-        если id данного пользователя отображается в адресной строке браузера как именованное.
+        если id данного пользователя отображается в адресной строке браузера именованным значением.
     '''
     TOKEN = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
     URL = 'https://api.vk.com/method/users.get'
@@ -35,6 +36,7 @@ class Extracting_photos:
         '''Метод для получения характеристик заданного количества фотографий 
            с профиля пользователя ВКонтакте.
         '''
+        bar = IncrementalBar('Countdown', min = self.get_profile_photo_description)
         id = int(input("Введите id пользователя: "))
         url = 'https://api.vk.com/method/photos.get'
         params = {
@@ -48,8 +50,11 @@ class Extracting_photos:
             'count': 10
         }
         result = requests.get(url, params=params)
+        bar.next()
+        time.sleep(1)
         # return result.json()['response'] # проверка содержимого отклика
         items_list = result.json()['response']['items']
+        bar.finish()
         return items_list # возвращается список заданного количества фотографий из профиля юзера
 
 
@@ -58,8 +63,11 @@ class Extracting_photos:
            описывающих фотографии максимального разрешения.
         
         '''
+        bar = IncrementalBar('Countdown', max = len(get_profile_photo_description))
         raw_list = []
         for dt in get_profile_photo_description:
+            bar.next()
+            time.sleep(1)
             dim = dt['sizes']  # это список словарей описывающих одно фото разных форматов (x, y, z, w etc.)
             name = str(dt['likes']['count'])
             dat = str(dt['date'])
@@ -74,6 +82,7 @@ class Extracting_photos:
                     pic_data['size'] = sizes[-1]
                     pic_data['url'] = pic['url']
             raw_list.append(pic_data)
+        bar.finish()
         return raw_list # возвращает вспомогательный список словарей, описывающих фотографии максимального разрешения с профиля юзера
 
     
@@ -82,8 +91,11 @@ class Extracting_photos:
             если элементы имеют одинаковое количество лайков.
         
         '''
+        bar = IncrementalBar('Countdown', max = len(get_raw_list))
         names = []
         for dt in get_raw_list:
+            bar.next()
+            time.sleep(1)
             names.append(dt['file_name'])
             names_set = set(names)
             dub_names = []
@@ -94,6 +106,7 @@ class Extracting_photos:
             inxs_list = []
             for tuple_ in dub_names:
                 inxs_list = inxs_list + tuple_[1]
+        bar.finish()
         return inxs_list # возвращает список индексов элементов списка фото с повторяющимся количеством лайков
 
 
@@ -101,6 +114,7 @@ class Extracting_photos:
         '''Метод для получения с профиля пользователя вспомогательного списка словарей,
            описывающих фотографии максимального разрешения с уникальными именами.
         '''
+
         for numeral in get_same_names_inxs:
             pic_data = get_raw_list[numeral]
             pic_data['file_name'] = pic_data['file_name'] + pic_data['upload_date']
@@ -112,7 +126,10 @@ class Extracting_photos:
            и получения json-файла с информацией по загруженным с профиля фотографиям,
            с ключами 'file_name' и 'size'.
         '''
+        bar = IncrementalBar('Countdown', max = len(get_corrected_list))
         for pic_data in get_corrected_list:
+            bar.next()
+            time.sleep(1)
             pic_data['file_name'] = pic_data['file_name'] + '.jpg'
             url = pic_data['url']
             res = requests.get(url)
@@ -122,6 +139,7 @@ class Extracting_photos:
             del(pic_data['url'])
             del(pic_data['upload_date'])
             json.dumps(get_corrected_list)
+        bar.finish()
         return get_corrected_list # загружает фотографии пользователя по списку в текущую папку и возвращает искомый список фотографий с профиля юзера
 
     def get_pictures(self, get_picture_list):
@@ -172,8 +190,11 @@ class YaUploader:
         
         '''
         import os
+        bar = IncrementalBar('Countdown', max = len(pictures))
         file_roots = []
         for picture in pictures:
+            bar.next()
+            time.sleep(1)
             filename = picture
             file_path = os.path.join(os.getcwd())
             file_path = file_path + '\\' + filename
@@ -181,6 +202,7 @@ class YaUploader:
             path_to_file = ft[-2:]
             f_p = path_to_file[0] + '\\' + path_to_file[1]
             file_roots.append(f_p)
+        bar.finish()
         return file_roots
         
 
@@ -192,12 +214,16 @@ class YaUploader:
 
         folder = create_a_disk_folder
         disk_roots = []
+        bar = IncrementalBar('Countdown', max = len(find_file_path))
         for elm in find_file_path:
+            bar.next()
+            time.sleep(1)
             ffp = elm
             f_n = ffp.split('\\')
             f_name = f_n[-1]
             path_to_disk = folder + '/' + f_name
             disk_roots.append(path_to_disk)
+        bar.finish()
         return disk_roots # возвращает список отдельных путей для сохранения каждой фотографии из VK во вновь созданную папку
         
 
@@ -205,13 +231,17 @@ class YaUploader:
         '''Метод для получения списка словарей-json, 
            описывающих ссылки для загрузки фото на Яндекс-диск.
         '''
+        bar = IncrementalBar('Countdown', max = len(disk_file_path))
         roots_json = []
         for elm in disk_file_path:
+            bar.next()
+            time.sleep(1)
             upload_url = "https://cloud-api.yandex.net/v1/disk/resources/upload"
             headers = self.get_headers()
             params = {"path": elm, "overwrite": "true"}
             response = requests.get(upload_url, headers=headers, params=params)
             roots_json.append(response.json())
+        bar.finish()
         return roots_json # возвращает список словарей-json, описывающих ссылки для загрузки фото на Яндекс-диск
 
     def get_hrefs(self, _get_upload_link):
@@ -230,13 +260,17 @@ class YaUploader:
            Сохраняет файлы на Яндекс.Диск с таким же именем во вновь созданную папку с уникальным
            именем
         """
-        zip_list = zip(get_hrefs, find_file_path)
+        zip_list = list(zip(get_hrefs, find_file_path))
+        bar = IncrementalBar('Countdown', max = len(zip_list))
         for i in zip_list:
+            bar.next()
+            time.sleep(1)
             href = i[0]
             response = requests.put(href, data=open(i[1].split('\\')[1], 'rb'))
             response.raise_for_status()
             if response.status_code != 201:
                 print("Something's going wrong!")
+        bar.finish()
         print('Loading is complete')
 
     
