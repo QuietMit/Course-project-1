@@ -181,7 +181,7 @@ class YaUploader:
         response.raise_for_status()
         if response.status_code == 201:
             print("The folder's created successfully")
-        return folder_name # для проверки метода выводом на печать
+        return folder_name # возвращает название вновь созданной по дате/времени папки
 
     
     def find_file_path(self, *pictures):
@@ -203,7 +203,7 @@ class YaUploader:
             f_p = path_to_file[0] + '\\' + path_to_file[1]
             file_roots.append(f_p)
         bar.finish()
-        return file_roots
+        return file_roots # возвращает список путей до файлов находящихся в текущей папке компьютера
         
 
     def disk_file_path(self, find_file_path, create_a_disk_folder):
@@ -253,7 +253,7 @@ class YaUploader:
         for i in _get_upload_link:
             hrefs.append(i['href'])
         # pprint(hrefs)
-        return hrefs # возвращает софрмированный список ссылок для загрузки фотографий на Яндекс-диск
+        return hrefs # возвращает сформированный список ссылок для загрузки фотографий на Яндекс-диск
 
     def upload(self, get_hrefs, find_file_path):
         """Метод принимает на вход списки ссылок для загрузки файлов и путей до файла на компьютере.
